@@ -9,7 +9,7 @@ on:
       tag:
         description: "npm dist-tag"
         required: false
-        default: "beta"
+        default: "latest"
 
 permissions:
   contents: read
@@ -39,7 +39,7 @@ jobs:
           npm run docs
 
       - name: Publish to npm
-        run: npm publish --access public --tag "${TAG:-beta}" --provenance
+        run: npm publish --access public --tag "${TAG:-latest}" --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          TAG: ${{ github.event.inputs.tag || 'beta' }}
+          TAG: ${{ github.event.inputs.tag || 'latest' }}

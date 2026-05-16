@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.3] - 2026-05-17
+
+### Changed
+- GitHub Actions publish workflow now defaults to dist-tag `latest` instead of
+  `beta`. Tag-triggered releases are treated as production releases. To
+  publish a beta, run the workflow manually via `workflow_dispatch` and
+  override the `tag` input.
+
 ## [0.1.2] - 2026-05-17
 
 ### Added
