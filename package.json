@@ -1,0 +1,70 @@
+{
+  "name": "@mangerik/wordpress-mcp",
+  "version": "0.1.2",
+  "description": "MCP Server for WordPress REST API — connect AI agents to WordPress (posts, pages, media, users, custom post types, WooCommerce, Yoast / Rank Math, block themes, multisite, batch).",
+  "main": "dist/index.js",
+  "type": "module",
+  "bin": {
+    "wordpress-mcp": "dist/index.js"
+  },
+  "files": [
+    "dist/**/*.js",
+    "dist/**/*.d.ts",
+    "docs/**/*.md",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md",
+    "SECURITY.md",
+    ".env.example"
+  ],
+  "scripts": {
+    "build": "tsc && node scripts/postbuild.mjs",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "watch": "tsc --watch",
+    "typecheck": "tsc --noEmit",
+    "smoke": "node scripts/smoke-test.mjs",
+    "docs": "npm run build && node scripts/gen-tools-doc.mjs",
+    "prepublishOnly": "npm run typecheck && npm run build && npm run smoke && npm run docs"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "axios": "^1.7.0",
+    "form-data": "^4.0.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsx": "^4.0.0",
+    "typescript": "^5.4.0"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "wordpress",
+    "wp-rest-api",
+    "woocommerce",
+    "yoast",
+    "rank-math",
+    "ai",
+    "agent",
+    "claude",
+    "kiro",
+    "llm"
+  ],
+  "homepage": "https://github.com/mangerik/WordPress-MCP#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mangerik/WordPress-MCP.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mangerik/WordPress-MCP/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "license": "MIT"
+}

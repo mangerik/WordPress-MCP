@@ -1,0 +1,45 @@
+name: Publish to npm
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "npm dist-tag"
+        required: false
+        default: "beta"
+
+permissions:
+  contents: read
+  id-token: write # required for npm provenance via OIDC
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          registry-url: "https://registry.npmjs.org/"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Typecheck, build, smoke, generate docs
+        run: |
+          npm run typecheck
+          npm run build
+          npm run smoke
+          npm run docs
+
+      - name: Publish to npm
+        run: npm publish --access public --tag "${TAG:-beta}" --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          TAG: ${{ github.event.inputs.tag || 'beta' }}
