@@ -1,5 +1,9 @@
 # WordPress MCP Server
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/mangerik/WordPress-MCP/main/assets/cover.jpg" alt="WordPress MCP Server" width="100%" />
+</p>
+
 A [Model Context Protocol](https://modelcontextprotocol.io) server that lets any MCP-compatible AI client (Claude Desktop, Kiro, Cursor, Continue, etc.) read and manage a WordPress site through the official REST API.
 
 ## Features
