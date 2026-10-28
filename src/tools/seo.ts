@@ -198,8 +198,9 @@ export const seoTools = (wp: WordPressClient): ToolDef[] => [
     description:
       "Write SEO meta (title, description, focus keyword, robots, OG, Twitter) " +
       "to a post or page via the chosen SEO plugin's meta keys. " +
-      "NOTE: the meta keys must be exposed via REST (Yoast does this automatically; " +
-      "Rank Math may require enabling REST API in plugin settings).",
+      "NOTE: WordPress only saves meta keys registered with show_in_rest. If a re-read " +
+      "with seo_get_meta shows the old values, the plugin's keys are not exposed over REST " +
+      "(register them with register_post_meta, or enable Rank Math's Headless CMS support).",
     inputSchema: {
       plugin: PLUGIN,
       post_type: postTypeEnum.default("post"),
@@ -219,6 +220,23 @@ export const seoTools = (wp: WordPressClient): ToolDef[] => [
         return { updated: false, reason: "no SEO fields provided" };
       }
       const route = routeFor(post_type);
+
+      // Rank Math stores every robots flag in one array. Merge with the
+      // current value so setting noindex doesn't drop nofollow/noarchive/etc.
+      const newFlags = meta[RANK_MATH_KEYS.robots] as string[] | undefined;
+      if (plugin === "rank_math" && newFlags) {
+        const current = (await wp.get(route, id, { context: "edit", _fields: "meta" })) as
+          | { meta?: Record<string, unknown> }
+          | undefined;
+        const existing = current?.meta?.[RANK_MATH_KEYS.robots];
+        const replaced = new Set<string>();
+        if (fields.noindex !== undefined) replaced.add("index").add("noindex");
+        if (fields.nofollow !== undefined) replaced.add("follow").add("nofollow");
+        const kept = Array.isArray(existing)
+          ? (existing as string[]).filter((f) => !replaced.has(f))
+          : [];
+        meta[RANK_MATH_KEYS.robots] = [...kept, ...newFlags];
+      }
       const result = (await wp.update(route, id, { meta })) as {
         id: number;
         meta?: Record<string, unknown>;

@@ -645,7 +645,7 @@ _Hints: read-only, idempotent, network call_
 ### `wp_get_current_user`
 **Get current user**
 
-Get the currently authenticated user (the WP_USERNAME used to start this server).
+Get the currently authenticated user (the WP_USERNAME used to start this server), including roles and capabilities.
 
 _Hints: read-only, idempotent, network call_
 
@@ -782,8 +782,8 @@ _Hints: read-only, idempotent, network call_
 | `search` | string |  |  |
 | `status` | `"any"` \| `"draft"` \| `"pending"` \| `"private"` \| `"publish"` |  |  |
 | `type` | `"simple"` \| `"grouped"` \| `"external"` \| `"variable"` |  |  |
-| `category` | string |  | Category slug |
-| `tag` | string |  | Tag slug |
+| `category` | number \| string |  | Product category ID (not slug). Find IDs with wc_list_product_categories. |
+| `tag` | number \| string |  | Product tag ID (not slug). |
 | `sku` | string |  |  |
 | `featured` | boolean |  |  |
 | `on_sale` | boolean |  |  |
@@ -826,8 +826,10 @@ _Hints: network call_
 | `status` | `"draft"` \| `"pending"` \| `"private"` \| `"publish"` |  |  |
 | `featured` | boolean |  |  |
 | `catalog_visibility` | `"visible"` \| `"catalog"` \| `"search"` \| `"hidden"` |  |  |
+| `date_on_sale_from` | string |  | Sale start, ISO8601 in store time |
+| `date_on_sale_to` | string |  | Sale end, ISO8601 in store time |
 | `manage_stock` | boolean |  |  |
-| `stock_quantity` | number |  |  |
+| `stock_quantity` | number |  | Ignored by WooCommerce unless manage_stock is true. |
 | `stock_status` | `"instock"` \| `"outofstock"` \| `"onbackorder"` |  |  |
 | `weight` | string |  |  |
 | `dimensions` | object |  |  |
@@ -840,14 +842,14 @@ _Hints: network call_
 ### `wc_update_product`
 **WC: update product**
 
-Update a WooCommerce product.
+Update a WooCommerce product. Send only the fields that change.
 
 _Hints: network call_
 
 | Argument | Type | Required | Description |
 |---|---|---|---|
 | `id` | number | ✓ |  |
-| `name` | string | ✓ |  |
+| `name` | string |  |  |
 | `type` | `"simple"` \| `"grouped"` \| `"external"` \| `"variable"` |  |  |
 | `regular_price` | string |  |  |
 | `sale_price` | string |  |  |
@@ -857,8 +859,10 @@ _Hints: network call_
 | `status` | `"draft"` \| `"pending"` \| `"private"` \| `"publish"` |  |  |
 | `featured` | boolean |  |  |
 | `catalog_visibility` | `"visible"` \| `"catalog"` \| `"search"` \| `"hidden"` |  |  |
+| `date_on_sale_from` | string |  | Sale start, ISO8601 in store time |
+| `date_on_sale_to` | string |  | Sale end, ISO8601 in store time |
 | `manage_stock` | boolean |  |  |
-| `stock_quantity` | number |  |  |
+| `stock_quantity` | number |  | Ignored by WooCommerce unless manage_stock is true. |
 | `stock_status` | `"instock"` \| `"outofstock"` \| `"onbackorder"` |  |  |
 | `weight` | string |  |  |
 | `dimensions` | object |  |  |
@@ -907,7 +911,14 @@ _Hints: network call_
 | `regular_price` | string |  |  |
 | `sale_price` | string |  |  |
 | `sku` | string |  |  |
-| `stock_quantity` | number |  |  |
+| `description` | string |  |  |
+| `status` | `"draft"` \| `"pending"` \| `"private"` \| `"publish"` |  |  |
+| `date_on_sale_from` | string |  |  |
+| `date_on_sale_to` | string |  |  |
+| `manage_stock` | boolean |  |  |
+| `stock_quantity` | number |  | Ignored by WooCommerce unless manage_stock is true. |
+| `stock_status` | `"instock"` \| `"outofstock"` \| `"onbackorder"` |  |  |
+| `weight` | string |  |  |
 | `attributes` | object[] |  |  |
 | `image` | object |  |  |
 
@@ -970,7 +981,7 @@ _Hints: network call_
 | Argument | Type | Required | Description |
 |---|---|---|---|
 | `id` | number | ✓ |  |
-| `status` | `"any"` \| `"pending"` \| `"processing"` \| `"on-hold"` \| `"completed"` \| `"cancelled"` \| `"refunded"` \| `"failed"` \| `"trash"` |  |  |
+| `status` | `"pending"` \| `"processing"` \| `"on-hold"` \| `"completed"` \| `"cancelled"` \| `"refunded"` \| `"failed"` \| `"trash"` |  |  |
 | `customer_note` | string |  |  |
 | `transaction_id` | string |  |  |
 | `meta_data` | object[] |  |  |
@@ -1113,7 +1124,7 @@ _Hints: read-only, idempotent, network call_
 ### `seo_set_meta`
 **Set SEO meta (Yoast / Rank Math)**
 
-Write SEO meta (title, description, focus keyword, robots, OG, Twitter) to a post or page via the chosen SEO plugin's meta keys. NOTE: the meta keys must be exposed via REST (Yoast does this automatically; Rank Math may require enabling REST API in plugin settings).
+Write SEO meta (title, description, focus keyword, robots, OG, Twitter) to a post or page via the chosen SEO plugin's meta keys. NOTE: WordPress only saves meta keys registered with show_in_rest. If a re-read with seo_get_meta shows the old values, the plugin's keys are not exposed over REST (register them with register_post_meta, or enable Rank Math's Headless CMS support).
 
 _Hints: network call_
 

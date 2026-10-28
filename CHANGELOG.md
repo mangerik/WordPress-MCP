@@ -5,6 +5,35 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.4] - 2026-10-28
+
+### Fixed
+- `wc_update_product` no longer requires `name`; send only the fields that change.
+- `wc_list_products` `category` / `tag` now take IDs (number or string), matching
+  the WooCommerce API. They were documented as slugs, which matched nothing.
+- `wc_update_order` no longer accepts `status: "any"` (only valid as a list filter).
+- `wc_create_variation` accepts `manage_stock`, without which WooCommerce silently
+  ignored `stock_quantity`. Also adds `stock_status`, `status`, `description`,
+  `weight`, and sale dates.
+- `wp_get_comments` `status: "approved"` / `"any"` returned no comments; they are
+  now mapped to the `approve` / `all` values WordPress expects.
+- `seo_set_meta` for Rank Math merges robots flags with the existing value instead
+  of overwriting them (setting `noindex` used to drop `nofollow`, `noarchive`, …).
+- Block template tools keep the `//` in `theme//slug` IDs instead of sending
+  `%2F%2F`, which many servers reject.
+- `wp_site_info` now honors `WP_VERIFY_SSL=false`.
+- Tools that return a JSON array no longer fail with an invalid `structuredContent`.
+
+### Added
+- `wc_create_product` / `wc_update_product`: `date_on_sale_from`, `date_on_sale_to`.
+- `wp_get_current_user` returns roles and capabilities (`context=edit`).
+
+### Changed
+- The server reports its real version (read from `package.json`) in the MCP
+  handshake and the default `WP_USER_AGENT`; it previously claimed `1.0.0` / `1.0`.
+- `seo_set_meta` description no longer claims Yoast exposes its meta keys over REST
+  automatically, and explains how to tell when the keys aren't registered.
+
 ## [0.1.3] - 2026-05-17
 
 ### Changed

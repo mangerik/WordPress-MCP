@@ -17,6 +17,14 @@ import type { ToolDef } from "../types.js";
 
 const orderEnum = z.enum(["asc", "desc"]);
 
+/**
+ * Template IDs contain a literal `//` (theme//slug). Encode each segment but
+ * keep the slashes: an encoded `%2F` is rejected by many servers (Apache's
+ * AllowEncodedSlashes defaults to Off) and the WP route regex expects `/`.
+ */
+const templatePath = (base: string, id: string) =>
+  `${base}/${id.split("/").map(encodeURIComponent).join("/")}`;
+
 export const blockTools = (wp: WordPressClient): ToolDef[] => [
   // ── Templates (full block templates) ───────────────────────────────────
   {
@@ -46,7 +54,7 @@ export const blockTools = (wp: WordPressClient): ToolDef[] => [
       const { id } = input as { id: string };
       return wp.raw({
         method: "GET",
-        path: `/wp/v2/templates/${encodeURIComponent(id)}`,
+        path: templatePath("/wp/v2/templates", id),
       });
     },
   },
@@ -68,7 +76,7 @@ export const blockTools = (wp: WordPressClient): ToolDef[] => [
       const { id, ...body } = input as { id: string; [k: string]: unknown };
       return wp.raw({
         method: "POST",
-        path: `/wp/v2/templates/${encodeURIComponent(id)}`,
+        path: templatePath("/wp/v2/templates", id),
         body,
       });
     },
@@ -101,7 +109,7 @@ export const blockTools = (wp: WordPressClient): ToolDef[] => [
       const { id } = input as { id: string };
       return wp.raw({
         method: "GET",
-        path: `/wp/v2/template-parts/${encodeURIComponent(id)}`,
+        path: templatePath("/wp/v2/template-parts", id),
       });
     },
   },
@@ -121,7 +129,7 @@ export const blockTools = (wp: WordPressClient): ToolDef[] => [
       const { id, ...body } = input as { id: string; [k: string]: unknown };
       return wp.raw({
         method: "POST",
-        path: `/wp/v2/template-parts/${encodeURIComponent(id)}`,
+        path: templatePath("/wp/v2/template-parts", id),
         body,
       });
     },

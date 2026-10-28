@@ -22,9 +22,12 @@ export const commentTools = (wp: WordPressClient): ToolDef[] => [
     },
     annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
     handler: async (input) => {
-      const result = await wp.comments.list(
-        input as Parameters<typeof wp.comments.list>[0]
-      );
+      // The list filter goes to WP_Comment_Query, which only understands
+      // "approve" and "all"; "approved"/"any" would match nothing.
+      const { status, ...rest } = input as { status?: string; [k: string]: unknown };
+      const queryStatus =
+        status === "approved" ? "approve" : status === "any" ? "all" : status;
+      const result = await wp.comments.list({ ...rest, status: queryStatus });
       return { comments: result.data, total: result.total };
     },
   },

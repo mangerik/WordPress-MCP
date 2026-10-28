@@ -93,7 +93,7 @@ Optional:
 | `WP_TIMEOUT_MS` | `30000` | Per-request timeout |
 | `WP_MAX_RETRIES` | `3` | Retries on 408/425/429/5xx |
 | `WP_VERIFY_SSL` | `true` | Set `false` only for local self-signed certs |
-| `WP_USER_AGENT` | `WordPress-MCP-Server/1.0` | UA header |
+| `WP_USER_AGENT` | `WordPress-MCP-Server/<version>` | UA header |
 
 ## Use it from an MCP client
 
@@ -192,7 +192,7 @@ Both plugins store SEO data in post meta with different keys; one uniform tool r
 - `yoast_indexable_for_post` — Yoast computed indexable record
 - `rankmath_list_redirections` · `rankmath_create_redirection` (Rank Math Pro)
 
-> Yoast exposes its meta via REST automatically. **Rank Math** may require enabling "REST API" in the plugin settings, and meta keys must be marked `show_in_rest`.
+> WordPress only saves meta keys registered with `show_in_rest`. If `seo_get_meta` still shows old values after `seo_set_meta`, register the plugin's keys with `register_post_meta()` (or, for **Rank Math**, enable Headless CMS support in its settings).
 
 ### Block themes (WP 5.9+)
 - Templates: `wp_list_templates` · `wp_get_template` · `wp_update_template`

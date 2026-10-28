@@ -38,7 +38,8 @@ export const userTools = (wp: WordPressClient): ToolDef[] => [
     name: "wp_get_current_user",
     title: "Get current user",
     description:
-      "Get the currently authenticated user (the WP_USERNAME used to start this server).",
+      "Get the currently authenticated user (the WP_USERNAME used to start this server), " +
+      "including roles and capabilities.",
     inputSchema: {},
     annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: true },
     handler: async () => wp.users.me(),

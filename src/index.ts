@@ -4,6 +4,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js"
 import type { CallToolResult } from "@modelcontextprotocol/sdk/types.js";
 
 import { loadConfig } from "./config.js";
+import { VERSION } from "./version.js";
 import { WordPressClient, WPError } from "./wordpress-client.js";
 import type { ToolDef } from "./types.js";
 
@@ -26,7 +27,6 @@ import { registerResources } from "./resources.js";
 import { registerPrompts } from "./prompts.js";
 
 const NAME = "wordpress-mcp";
-const VERSION = "1.0.0";
 
 /**
  * Wrap a tool handler so its return value becomes a proper `CallToolResult`
@@ -44,8 +44,9 @@ function wrap(tool: ToolDef): (input: Record<string, unknown>) => Promise<CallTo
       const result: CallToolResult = {
         content: [{ type: "text", text }],
       };
-      // Attach structured output when it's a JSON-compatible object.
-      if (data && typeof data === "object") {
+      // Attach structured output only for plain objects: the MCP spec requires
+      // structuredContent to be a JSON object, and the SDK rejects arrays.
+      if (data && typeof data === "object" && !Array.isArray(data)) {
         (result as { structuredContent?: unknown }).structuredContent = data;
       }
       return result;

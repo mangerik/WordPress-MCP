@@ -24,8 +24,14 @@ const productListSchema = {
   search: z.string().optional(),
   status: z.enum(["any", "draft", "pending", "private", "publish"]).optional(),
   type: z.enum(["simple", "grouped", "external", "variable"]).optional(),
-  category: z.string().optional().describe("Category slug"),
-  tag: z.string().optional().describe("Tag slug"),
+  category: z
+    .union([z.number().int(), z.string()])
+    .optional()
+    .describe("Product category ID (not slug). Find IDs with wc_list_product_categories."),
+  tag: z
+    .union([z.number().int(), z.string()])
+    .optional()
+    .describe("Product tag ID (not slug)."),
   sku: z.string().optional(),
   featured: z.boolean().optional(),
   on_sale: z.boolean().optional(),
@@ -52,8 +58,14 @@ const productCreateSchema = {
   status: z.enum(["draft", "pending", "private", "publish"]).optional(),
   featured: z.boolean().optional(),
   catalog_visibility: z.enum(["visible", "catalog", "search", "hidden"]).optional(),
+  date_on_sale_from: z.string().optional().describe("Sale start, ISO8601 in store time"),
+  date_on_sale_to: z.string().optional().describe("Sale end, ISO8601 in store time"),
   manage_stock: z.boolean().optional(),
-  stock_quantity: z.number().int().optional(),
+  stock_quantity: z
+    .number()
+    .int()
+    .optional()
+    .describe("Ignored by WooCommerce unless manage_stock is true."),
   stock_status: z.enum(["instock", "outofstock", "onbackorder"]).optional(),
   weight: z.string().optional(),
   dimensions: z
@@ -92,10 +104,15 @@ const productCreateSchema = {
     .optional(),
 };
 
+// Updates must not require `name`; only send the fields that change.
+const productUpdateSchema = {
+  ...productCreateSchema,
+  name: productCreateSchema.name.optional(),
+};
+
 // ─── Orders ───────────────────────────────────────────────────────────────
 
 const orderStatus = z.enum([
-  "any",
   "pending",
   "processing",
   "on-hold",
@@ -105,12 +122,14 @@ const orderStatus = z.enum([
   "failed",
   "trash",
 ]);
+// "any" is only valid as a list filter, never as a status to set.
+const orderStatusFilter = z.enum(["any", ...orderStatus.options]);
 
 const orderListSchema = {
   page: z.number().int().positive().optional(),
   per_page: z.number().int().min(1).max(100).optional(),
   search: z.string().optional(),
-  status: orderStatus.optional(),
+  status: orderStatusFilter.optional(),
   customer: z.number().int().optional(),
   product: z.number().int().optional(),
   after: z.string().optional(),
@@ -154,14 +173,11 @@ export const woocommerceTools = (wp: WordPressClient): ToolDef[] => [
   {
     name: "wc_update_product",
     title: "WC: update product",
-    description: "Update a WooCommerce product.",
-    inputSchema: { id: z.number().int().positive(), ...productCreateSchema },
+    description: "Update a WooCommerce product. Send only the fields that change.",
+    inputSchema: { id: z.number().int().positive(), ...productUpdateSchema },
     annotations: { openWorldHint: true },
     handler: async (input) => {
       const { id, ...data } = input as { id: number; [k: string]: unknown };
-      // All productCreateSchema fields are required at the top level, but
-      // for updates we want them optional. Strip undefined explicitly so
-      // we don't send them. (Zod already drops undefined; keep cast safe.)
       return wp.update("wc/v3/products", id, data);
     },
   },
@@ -208,7 +224,18 @@ export const woocommerceTools = (wp: WordPressClient): ToolDef[] => [
       regular_price: z.string().optional(),
       sale_price: z.string().optional(),
       sku: z.string().optional(),
-      stock_quantity: z.number().int().optional(),
+      description: z.string().optional(),
+      status: z.enum(["draft", "pending", "private", "publish"]).optional(),
+      date_on_sale_from: z.string().optional(),
+      date_on_sale_to: z.string().optional(),
+      manage_stock: z.boolean().optional(),
+      stock_quantity: z
+        .number()
+        .int()
+        .optional()
+        .describe("Ignored by WooCommerce unless manage_stock is true."),
+      stock_status: z.enum(["instock", "outofstock", "onbackorder"]).optional(),
+      weight: z.string().optional(),
       attributes: z
         .array(z.object({ id: z.number().int().optional(), name: z.string().optional(), option: z.string() }))
         .optional(),

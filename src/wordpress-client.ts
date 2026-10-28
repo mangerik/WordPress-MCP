@@ -462,8 +462,13 @@ export class WordPressClient {
   users = {
     list: (p?: WPQueryParams) => this.list("wp/v2/users", p),
     get: (id: number) => this.get("wp/v2/users", id),
+    // context=edit adds roles/capabilities; every user may read their own.
     me: async () => {
-      const { data } = await this.request({ method: "GET", url: "/wp/v2/users/me" });
+      const { data } = await this.request({
+        method: "GET",
+        url: "/wp/v2/users/me",
+        params: { context: "edit" },
+      });
       return data;
     },
     create: (body: Record<string, unknown>) => this.create("wp/v2/users", body),
@@ -488,6 +493,8 @@ export class WordPressClient {
       timeout: 15_000,
       headers: { "User-Agent": this.userAgent },
       validateStatus: () => true,
+      // Honor WP_VERIFY_SSL=false like every other request does.
+      httpsAgent: this.client.defaults.httpsAgent as https.Agent | undefined,
     });
     if (res.status !== 200) {
       throw new WPError(`Cannot reach REST root: HTTP ${res.status}`, {

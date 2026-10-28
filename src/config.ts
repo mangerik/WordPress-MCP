@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { VERSION } from "./version.js";
 
 /**
  * Server configuration loaded from environment variables.
@@ -33,7 +34,7 @@ const ConfigSchema = z
       .union([z.literal("true"), z.literal("false")])
       .default("true")
       .transform((v) => v === "true"),
-    WP_USER_AGENT: z.string().default("WordPress-MCP-Server/1.0"),
+    WP_USER_AGENT: z.string().default(`WordPress-MCP-Server/${VERSION}`),
 
     // ── WooCommerce (optional) ──────────────────────────────────────────
     WC_CONSUMER_KEY: z.string().optional(),
@@ -86,7 +87,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): ServerConfig {
         `  WP_TIMEOUT_MS     (default 30000)\n` +
         `  WP_MAX_RETRIES    (default 3)\n` +
         `  WP_VERIFY_SSL     (default true)\n` +
-        `  WP_USER_AGENT     (default WordPress-MCP-Server/1.0)\n` +
+        `  WP_USER_AGENT     (default WordPress-MCP-Server/${VERSION})\n` +
         `  WC_CONSUMER_KEY   (optional, WooCommerce consumer key)\n` +
         `  WC_CONSUMER_SECRET(optional, WooCommerce consumer secret)`
     );
